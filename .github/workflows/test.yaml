@@ -42,7 +42,7 @@ jobs:
       - name: Build application
         run: |
           go env -w GOFLAGS="-buildvcs=false"
-          go build -o ./bin/app ./cmd/app/
+          go build -o ./bin/app ./cmd/
 
       - name: Run migrations
         run: |
