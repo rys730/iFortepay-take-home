@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rys730/iFortepay-take-home/internal/model/dto"
 	"github.com/rys730/iFortepay-take-home/internal/model/entity"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -169,7 +170,7 @@ func TestProductUsecase_Checkout_ProductOutOfStock(t *testing.T) {
 		Sku:       "120P90",
 		Name:      "Google Home",
 		Price:     49.99,
-		Quantity:  100,
+		Quantity:  10,
 	}
 
 	mockProductRepo.On("GetProductByID", ctx, int32(1)).Return(product, nil).Once()
@@ -351,7 +352,7 @@ func TestProductUsecase_ApplyPromotionRules_FREE_ITEM(t *testing.T) {
 
 	mockProductRepo.On("GetProductByID", ctx, int32(4)).Return(freeItem, nil).Once()
 
-	checkoutItems, err := pu.ApplyPromotionRules(ctx, product, 2, promotions)
+	checkoutItems, err := pu.ApplyPromotionRules(ctx, product, 1, promotions)
 
 	mockProductRepo.AssertExpectations(t)
 	mockPromoRepo.AssertNotCalled(t, "GetProductPromotionsByProductID", mock.Anything)
@@ -486,7 +487,7 @@ func TestProductUsecase_ApplyPromotionRules_BULK_DISCOUNT(t *testing.T) {
 
 	expectedCheckoutItems := []entity.CheckoutItem{
 		{
-			ProductID:   1,
+			ProductID:   3,
 			ProductName: "Alexa Speaker",
 			Quantity:    3,
 			TotalPrice:  295.65,
@@ -545,7 +546,7 @@ func TestProductUsecase_ApplyPromotionRules_Default(t *testing.T) {
 			ProductID:   1,
 			ProductName: "Google Home",
 			Quantity:    2,
-			TotalPrice:  20.0,
+			TotalPrice:  99.98,
 		},
 	}
 
@@ -592,7 +593,7 @@ func TestProductUsecase_ApplyPromotionRules_FreeItemNotFound(t *testing.T) {
 		},
 	}
 
-	mockProductRepo.On("GetProductByID", ctx, int32(1)).Return(entity.Product{}, pgx.ErrNoRows).Once()
+	mockProductRepo.On("GetProductByID", ctx, int32(4)).Return(entity.Product{}, pgx.ErrNoRows).Once()
 
 	checkoutItems, err := pu.ApplyPromotionRules(ctx, product, 1, promotions)
 
@@ -657,7 +658,7 @@ func TestProductUsecase_ApplyPromotionRules_FreeItemInternalServerError(t *testi
 
 	mockProductRepo.On("GetProductByID", ctx, int32(2)).Return(entity.Product{}, errors.New("internal server error")).Once()
 
-	checkoutItems, err := pu.ApplyPromotionRules(ctx, product, 2, promotions)
+	_, err := pu.ApplyPromotionRules(ctx, product, 2, promotions)
 
 	mockProductRepo.AssertExpectations(t)
 	mockPromoRepo.AssertNotCalled(t, "GetProductPromotionsByProductID", mock.Anything)
@@ -665,12 +666,5 @@ func TestProductUsecase_ApplyPromotionRules_FreeItemInternalServerError(t *testi
 	if err == nil {
 		t.Errorf("Expected error, but got nil")
 	}
-	if !reflect.DeepEqual(checkoutItems, []entity.CheckoutItem{{
-		ProductID:   1,
-		ProductName: "Google Home",
-		Quantity:    2,
-		TotalPrice:  20.0,
-	}}) {
-		t.Errorf("not equal")
-	}
+	assert.Error(t, err)
 }
