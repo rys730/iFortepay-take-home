@@ -17,7 +17,7 @@ func main() {
 	app := CreateApp(cfg)
 	go func() {
 		if err := app.Start(fmt.Sprintf(":%d", cfg.App.Port)); err != nil {
-			log.Fatal().Err(err).Msg("error starting app")
+			log.Fatal().Err(err).Msg("closing server")
 		}
 	}()
 	log.Info().Int("port", cfg.App.Port).Msg("app started")

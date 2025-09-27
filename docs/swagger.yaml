@@ -1,0 +1,66 @@
+definitions:
+  dto.CheckoutItemData:
+    properties:
+      id:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  dto.CheckoutRequest:
+    properties:
+      items:
+        description: CustomerID int      `json:"customer_id"`
+        items:
+          $ref: '#/definitions/dto.CheckoutItemData'
+        type: array
+    type: object
+  dto.CheckoutResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/entity.CheckoutItem'
+        type: array
+      message:
+        type: string
+      total_price:
+        type: string
+    type: object
+  entity.CheckoutItem:
+    properties:
+      product_id:
+        type: integer
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        description: Price after applying promotion
+        type: number
+    type: object
+info:
+  contact: {}
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /api/checkout:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CheckoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: successful response message
+          schema:
+            $ref: '#/definitions/dto.CheckoutResponse'
+      summary: Checkout products
+      tags:
+      - api
+swagger: "2.0"

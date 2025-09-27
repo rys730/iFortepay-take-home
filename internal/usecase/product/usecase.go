@@ -1,15 +1,28 @@
 package product
 
-import "github.com/rys730/iFortepay-take-home/internal/repository/product"
+import (
+	"context"
 
-type Usecase interface {}
+	"github.com/rys730/iFortepay-take-home/internal/model/dto"
+	"github.com/rys730/iFortepay-take-home/internal/repository/product"
+	"github.com/rys730/iFortepay-take-home/internal/repository/promotion"
+)
 
-type ProductUsecase struct {
-	pr product.Repository
+type Usecase interface {
+	Checkout(ctx context.Context, req dto.CheckoutRequest) (dto.CheckoutResponse, error)
 }
 
-func NewProductUsecase(pr product.Repository) Usecase {
+type ProductUsecase struct {
+	productRepo product.Repository
+	promoRepo   promotion.Repository
+}
+
+func NewProductUsecase(
+	productRepo product.Repository,
+	promoRepo promotion.Repository,
+) Usecase {
 	return &ProductUsecase{
-		pr: pr,
+		productRepo: productRepo,
+		promoRepo:   promoRepo,
 	}
 }
