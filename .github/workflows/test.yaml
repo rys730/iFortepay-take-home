@@ -1,0 +1,62 @@
+name: Test Go Application
+run-name: "Check and validate app #${{ github.event.pull_request.number }} by @${{ github.actor }}"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/*.go"
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+
+jobs:
+  build-and-test-go:
+    name: "Build and Test Go"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.2
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: Build application
+        run: |
+          go env -w GOFLAGS="-buildvcs=false"
+          go build -o ./bin/app ./cmd/app/
+
+      - name: Run migrations
+        run: |
+          go install github.com/pressly/goose/v3/cmd/goose@latest
+          goose -dir db/migrations postgres "postgres://postgres:postgres@localhost:5432/testdb?sslmode=disable" up
+
+      - name: Run tests
+        env:
+          APP_PORT: 8080
+          DB_NAME: testdb
+          DB_DRIVER: postgres
+          DB_CREDS: postgres:postgres
+          DB_HOST: localhost
+          DB_PORT: 5432
+        run: |
+          go test ./... -v -race -coverprofile=coverage.out
+          go tool cover -func=coverage.out
