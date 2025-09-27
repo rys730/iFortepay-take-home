@@ -1,0 +1,32 @@
+version: "3"
+services:
+  ifortepay-take-home:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    volumes:
+    - ./db/migrations:/migrations
+    environment:
+      - APP_PORT=8080
+      - DB_NAME=iforte
+      - DB_DRIVER=postgres
+      - DB_CREDS=postgres:postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    command: >
+      sh -c "
+        goose -dir /migrations postgres 'postgres://postgres:postgres@postgres:5432/iforte?sslmode=disable' up &&
+        ./main
+      "
+    ports:
+      - "8080:8080"
+  postgres:
+    image: postgres:16.2
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=iforte
+    ports:
+      - "3322:5432"

@@ -33,7 +33,7 @@ func NewConfig() *Config {
 	var cfg Config
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal().Err(err).Msg("error loading .env file")
+		log.Info().Err(err).Msg("error loading .env file, will use os env")
 	}
 
 	err = env.Parse(&cfg)
