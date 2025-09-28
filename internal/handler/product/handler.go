@@ -17,6 +17,5 @@ func NewProductHandler(pu productUsecase.Usecase) handler.APIHandler {
 }
 
 func (h *ProductHandler) RegisterRoutes(e *echo.Group) {
-	e.Group("/product")
 	e.POST("/checkout", h.HandleCheckout)
 }

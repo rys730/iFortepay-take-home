@@ -1,0 +1,42 @@
+version: "3"
+services:
+  ifortepay-take-home-e2e-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+    - ./db/migrations:/migrations
+    environment:
+      - APP_PORT=8085
+      - DB_NAME=iforte-test
+      - DB_DRIVER=postgres
+      - DB_CREDS=postgres:postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    command: >
+      sh -c "
+        goose -dir /migrations postgres 'postgres://postgres:postgres@postgres:5432/iforte-test?sslmode=disable' up &&
+        ./main
+      "
+    ports:
+      - "8085:8085"
+  postgres:
+    image: postgres:16.2
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=iforte-test
+    ports:
+      - "3333:5432"
+    volumes:
+      - postgres_e2e_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d iforte-test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres_e2e_data:

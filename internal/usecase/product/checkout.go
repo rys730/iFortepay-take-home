@@ -29,7 +29,7 @@ func (pu *ProductUsecase) Checkout(ctx context.Context, req dto.CheckoutRequest)
 			return dto.CheckoutResponse{}, echo.NewHTTPError(400, fmt.Sprintf("product with id %d has only %d items left in stock", item.ID, product.Quantity))
 		}
 		// get item promotions by product id
-		promotion, err := pu.promoRepo.GetProductPromotionsByProductID(ctx, req.Items[0].ID)
+		promotion, err := pu.promoRepo.GetProductPromotionsByProductID(ctx, item.ID)
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			return dto.CheckoutResponse{}, echo.ErrInternalServerError
 		}

@@ -9,12 +9,13 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/rys730/iFortepay-take-home/cmd/app"
 	"github.com/rys730/iFortepay-take-home/internal/common/config"
 )
 
 func main() {
 	cfg := config.NewConfig()
-	app := CreateApp(cfg)
+	app := app.CreateApp(cfg)
 	go func() {
 		if err := app.Start(fmt.Sprintf(":%d", cfg.App.Port)); err != nil {
 			log.Fatal().Err(err).Msg("closing server")

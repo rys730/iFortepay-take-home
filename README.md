@@ -64,3 +64,24 @@ By separating concerns into folders, making it cleaner:
     - `/usecase` -> business logic
     - `/repository` -> DB, HTTP/External APIs
 
+## Running E2E test
+
+e2e tests lives in the e2e folder. to run it you will need to run the docker-compose.test.yml first.
+
+```
+docker compose -f docker-compose.test.yml up 
+```
+
+and then you can do 
+
+```
+go test ./e2e
+```
+
+**NOTES**: the data seeded is still based on migration files (`/db/migrations`) and not seeded everytime tests runs (could be an improvement). to re-seed, you can fresh run the docker compose.
+
+```
+docker compose -f docker-compose.test.yml down -v  
+```
+
+this will delete the postgres volume, so when the docker compose up again it will be fresh db and seeded again.
